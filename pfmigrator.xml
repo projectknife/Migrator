@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="2.5" method="upgrade">
+    <name>com_pfmigrator</name>
+    <author>Tobias Kuhn</author>
+    <creationDate>June 2013</creationDate>
+    <copyright>(C) 2013 Tobias Kuhn. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>support@projectfork.net</authorEmail>
+    <authorUrl>www.projectfork.net</authorUrl>
+    <version>1.0.0</version>
+    <description>COM_PFMIGRATOR_XML_DESCRIPTION</description>
+    <files folder="site">
+        <folder>views</folder>
+        <filename>pfmigrator.php</filename>
+        <filename>controller.php</filename>
+    </files>
+    <languages folder="site">
+        <language tag="en-GB">language/en-GB/en-GB.com_pfmigrator.ini</language>
+    </languages>
+    <administration>
+        <files folder="admin">
+            <folder>controllers</folder>
+            <folder>helpers</folder>
+            <folder>models</folder>
+            <folder>views</folder>
+            <filename>config.xml</filename>
+            <filename>controller.php</filename>
+            <filename>pfmigrator.php</filename>
+        </files>
+        <languages folder="admin">
+            <language tag="en-GB">language/en-GB/en-GB.com_pfmigrator.ini</language>
+            <language tag="en-GB">language/en-GB/en-GB.com_pfmigrator.sys.ini</language>
+        </languages>
+    </administration>
+    <media destination="com_pfmigrator" folder="media">
+        <folder>pfmigrator</folder>
+    </media>
+</extension>

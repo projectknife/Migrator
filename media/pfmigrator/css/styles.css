@@ -1,0 +1,63 @@
+.pfm-progress
+{
+    background-color: #F7F7F7;
+    background-image: linear-gradient(to bottom, #F5F5F5, #F9F9F9);
+    background-repeat: repeat-x;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) inset;
+    height: 18px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+.pfm-progress .pfm-bar
+{
+    -moz-box-sizing: border-box;
+    background-color: #0E90D2;
+    background-image: linear-gradient(to bottom, #149BDF, #0480BE);
+    background-repeat: repeat-x;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15) inset;
+    color: #FFFFFF;
+    float: left;
+    font-size: 12px;
+    height: 100%;
+    text-align: center;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    transition: width 0.6s ease 0s;
+    width: 0;
+}
+.pfm-label
+{
+    border-radius: 3px 3px 3px 3px;
+    padding: 1px 4px 2px;
+    background-color: #999999;
+    color: #FFFFFF;
+    font-size: 10.998px;
+    font-weight: bold;
+    line-height: 14px;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+.pfm-label-success,
+.pfm-badge-success
+{
+    background-color: #468847;
+}
+.pfm-label-important,
+.pfm-badge-important
+{
+    background-color: #B94A48;
+}
+.pfm-label-inverse,
+.pfm-badge-inverse
+{
+    background-color: #333333;
+}
+.proc-active
+{
+    font-weight: bold;
+}
+.proc-done
+{
+    color: #ccc;
+}
