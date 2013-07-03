@@ -36,12 +36,11 @@ class PFmigratorViewMigrate extends JViewLegacy
     {
         $app = JFactory::getApplication();
 
-        $this->process    = (int) $app->getUserState('com_pfmigrator.process');
-        $this->limit      = (int) $app->getUserState('com_pfmigrator.limit');
-        $this->limitstart = (int) $app->getUserState('com_pfmigrator.limitstart');
-        $this->total      = (int) $app->getUserState('com_pfmigrator.total');
-
-        $this->processes = $this->get('Items');
+        $this->process    = 0;
+        $this->limitstart = 0;
+        $this->limit      = $this->get('Limit');
+        $this->total      = $this->get('Total');
+        $this->processes  = $this->get('Items');
 
         // Check for errors
         $errors = $this->get('Errors');

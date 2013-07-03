@@ -18,15 +18,22 @@ JHtml::_('script', 'com_pfmigrator/pfmigrator/process.js', false, true, false, f
 
 $script = array();
 $script[] = "window.addEvent('domready', function() {";
-$script[] = "PFmigrator.process();";
+$script[] = "PFmigrator.process({";
+$script[] = "txt_idle: '" . JText::_('COM_PFMIGRATOR_STATE_IDLE') . "',";
+$script[] = "txt_proc: '" . JText::_('COM_PFMIGRATOR_STATE_PROC') . "',";
+$script[] = "txt_err: '" . JText::_('COM_PFMIGRATOR_STATE_ERROR') . "',";
+$script[] = "txt_cpl: '" . JText::_('COM_PFMIGRATOR_STATE_COMPLETE') . "',";
+$script[] = "txt_upd: '" . JText::_('COM_PFMIGRATOR_STATE_UPDATE') . "'";
+$script[] = "});";
 $script[] = "});";
 
 JFactory::getDocument()->addScriptDeclaration(implode('', $script));
 ?>
-<form action="<?php echo JRoute::_('index.php?option=com_pfmigrator&view=migrate'); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" autocomplete="off">
-    <input type="hidden" name="option" value="com_pfmigrator" />
+<form action="<?php echo JRoute::_('index.php?option=com_pfmigrator'); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" autocomplete="off">
     <input type="hidden" name="view" value="migrate" />
     <input type="hidden" id="jform_task" name="task" value="" />
+    <input type="hidden" id="jform_process" name="process" value="<?php echo $this->process; ?>" />
+    <input type="hidden" id="jform_processes" name="processes" value="<?php echo count($this->processes); ?>" />
     <input type="hidden" id="jform_limit" name="limit" value="<?php echo $this->limit; ?>" />
     <input type="hidden" id="jform_limitstart" name="limitstart" value="<?php echo $this->limitstart; ?>" />
     <input type="hidden" id="jform_total" name="total" value="<?php echo $this->total; ?>" />
@@ -48,9 +55,11 @@ JFactory::getDocument()->addScriptDeclaration(implode('', $script));
             </fieldset>
             <fieldset class="adminform">
                 <legend><?php echo JText::_('COM_PFMIGRATOR_FIELDSET_PROCESS_LOG'); ?></legend>
-                <ul id="jform_log" class="unstyled">
-                    <?php echo $this->loadTemplate('log'); ?>
-                </ul>
+                <div id="jform_log_container">
+                    <ul id="jform_log" class="unstyled">
+                        <?php echo $this->loadTemplate('log'); ?>
+                    </ul>
+                </div>
             </fieldset>
         </div>
     </div>
@@ -67,6 +76,4 @@ JFactory::getDocument()->addScriptDeclaration(implode('', $script));
     </div>
 
     <div class="clr"></div>
-
-    <input type="hidden" name="option" value="com_pfmigrator" />
 </form>

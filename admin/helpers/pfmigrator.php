@@ -1,70 +1,23 @@
 <?php
 /**
- * @package      Projectfork
- * @subpackage   Tasks
+ * @package      com_pfmigrator
  *
  * @author       Tobias Kuhn (eaxs)
- * @copyright    Copyright (C) 2006-2013 Tobias Kuhn. All rights reserved.
+ * @copyright    Copyright (C) 2013 Tobias Kuhn. All rights reserved.
  * @license      http://www.gnu.org/licenses/gpl.html GNU/GPL, see LICENSE.txt
  */
 
 defined('_JEXEC') or die();
 
 
-class PFtasksHelper
+abstract class PFmigratorHelper
 {
     /**
      * The component name
      *
      * @var    string
      */
-    public static $extension = 'com_pftasks';
-
-
-    /**
-     * Configure the Linkbar.
-     *
-     * @param     string    $view    The name of the active view.
-     *
-     * @return    void
-     */
-    public static function addSubmenu($view)
-    {
-        $is_j3 = version_compare(JVERSION, '3.0.0', 'ge');
-        $forms = array('task', 'tasklist');
-
-        if (in_array($view, $forms) && $is_j3) return;
-
-        $components = PFApplicationHelper::getComponents();
-        $option     = JFactory::getApplication()->input->get('option');
-        $class      = ($is_j3 ? 'JHtmlSidebar' : 'JSubMenuHelper');
-
-        foreach ($components AS $component)
-        {
-            if ($component->enabled == '0') continue;
-
-            $title = JText::_($component->element);
-            $parts = explode('-', $title, 2);
-
-            if (count($parts) == 2) $title = trim($parts[1]);
-
-            call_user_func(
-                array($class, 'addEntry'),
-                $title,
-                'index.php?option=' . $component->element,
-                ($option == $component->element && $view == 'tasks')
-            );
-
-            if ($option == $component->element) {
-                call_user_func(
-                    array($class, 'addEntry'),
-                    JText::_('COM_PROJECTFORK_SUBMENU_TASKLISTS'),
-                    'index.php?option=' . $component->element . '&view=tasklists',
-                    ($option == $component->element && $view == 'tasklists')
-                );
-            }
-        }
-    }
+    public static $extension = 'com_pfmigrator';
 
 
     /**
@@ -80,15 +33,7 @@ class PFtasksHelper
         $user   = JFactory::getUser();
         $result = new JObject;
 
-        if ((int) $id > 0) {
-            $asset = 'com_pftasks.task.' . (int) $id;
-        }
-        elseif ((int) $list > 0) {
-            $asset = 'com_pftasks.tasklist.' . (int) $list;
-        }
-        else {
-            $asset = self::$extension;
-        }
+        $asset = self::$extension;
 
         $actions = array(
             'core.admin', 'core.manage',
@@ -106,67 +51,66 @@ class PFtasksHelper
     }
 
 
-    /**
-     * Gets a list of actions that can be performed on a task list.
-     *
-     * @param     integer    $id    The item id
-     *
-     * @return    jobject
-     */
-    public static function getListActions($id = 0)
+    public static function getConfig($name, $scope = 'system')
     {
-        $user   = JFactory::getUser();
-        $result = new JObject;
+        static $cache = array();
 
-        if ((int) $id > 0) {
-            $asset = 'com_pftasks.tasklist.' . (int) $id;
-        }
-        else {
-            $asset = self::$extension;
+        $cache_key = $scope . '.' . $name;
+
+        if (isset($cache[$cache_key])) {
+            return $cache[$cache_key];
         }
 
-        $actions = array(
-            'core.admin', 'core.manage',
-            'core.create', 'core.edit',
-            'core.edit.own', 'core.edit.state',
-            'core.delete'
-        );
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
 
-        foreach ($actions as $action)
-        {
-            $result->set($action, $user->authorise($action, $asset));
-        }
+        $query->select('content')
+              ->from('#__pf_settings_tmp')
+              ->where($db->quoteName('parameter') . ' = ' . $db->quote($name))
+              ->where($db->quoteName('scope') . ' = ' . $db->quote($scope));
 
-        return $result;
+        $db->setQuery($query, 0, 1);
+        $result = $db->loadResult();
+
+        $cache[$cache_key] = $result;
+
+        return $cache[$cache_key];
     }
 
 
-    static public function priority2string($value = null)
+    public static function getCustomData()
     {
-        switch((int) $value)
-        {
-            case 2:
-                $text  = JText::_('COM_PROJECTFORK_PRIORITY_LOW');
-                break;
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
 
-            case 3:
-                $text  = JText::_('COM_PROJECTFORK_PRIORITY_MEDIUM');
-                break;
+        $query->select('custom_data')
+              ->from('#__extensions')
+              ->where('type = ' . $db->quote('component'))
+              ->where('element = ' . $db->quote('com_pfmigrator'));
 
-            case 4:
-                $text  = JText::_('COM_PROJECTFORK_PRIORITY_HIGH');
-                break;
+        $db->setQuery($query);
+        $result = $db->loadResult();
 
-            case 5:
-                $text  = JText::_('COM_PROJECTFORK_PRIORITY_VERY_HIGH');
-                break;
+        if (empty($result)) $result = '{}';
 
-            default:
-            case 1:
-                $text  = JText::_('COM_PROJECTFORK_PRIORITY_VERY_LOW');
-                break;
-        }
+        $data = new JRegistry();
+        $data->loadString($result);
 
-        return $text;
+        return $data;
+    }
+
+
+    public static function setCustomData($data)
+    {
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->update('#__extensions')
+              ->set('custom_data = ' . $db->quote($data->__toString()))
+              ->where('type = ' . $db->quote('component'))
+              ->where('element = ' . $db->quote('com_pfmigrator'));
+
+        $db->setQuery($query);
+        $db->execute();
     }
 }

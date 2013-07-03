@@ -1,21 +1,17 @@
 var PFmigrator =
 {
-    process: function()
+    process: function(opt)
     {
-        console.log('Starting process...');
-
         // Get the form
         var f  = $('adminForm');
         var t  = $('jform_task');
         var tv = t.value;
 
-        var total = $('jform_total', f).get('value');
-        var ls    = $('jform_limitstart', f).get('value');
+        var total = $('jform_total').get('value');
+        var ls    = $('jform_limitstart').get('value');
         var jstat = $('jform_status');
         var tint  = parseInt(total);
         var lsint = 0;
-
-        console.log('Got all the vars');
 
         // Set the value of the "task" field
         t.set('value', 'process');
@@ -23,7 +19,7 @@ var PFmigrator =
         // Serialize the form
         var d = f.toQueryString();
 
-        console.log(d);
+        jstat.set('text', opt.txt_proc);
 
         // Do the ajax request
         var rq = new Request.JSON(
@@ -34,22 +30,26 @@ var PFmigrator =
             cache: false,
             onSuccess: function(resp)
             {
-                console.log('Request successful...');
-                console.log(resp);
-
                 // Update hidden form fields
                 $('jform_limitstart').set('value', resp.limitstart);
+                $('jform_total').set('value', resp.total);
+                $('jform_limit').set('value', resp.limit);
 
                 // Update the counter info
                 $('counter_limitstart').set('text', resp.limitstart);
+                $('counter_total').set('text', resp.total);
 
                 // Get integer values
+                total = $('jform_total').get('value');
+                ls    = $('jform_limitstart').get('value');
+                tint  = parseInt(total);
+
                 var lsint = parseInt(resp.limitstart);
 
                 // Update the progress bar
-                var progress = lsint * (100/ tint);
-                jQuery('progress_bar').setStyle('width', progress + '%');
-                jQuery('progress_label').set('text', parseInt(progress) + '%');
+                var progress = lsint * (100/tint);
+                $('progress_bar').setStyle('width', progress + '%');
+                $('progress_label').set('text', parseInt(progress) + '%');
 
                 // Append the log
                 if (typeof resp.proclog != 'undefined') {
@@ -57,7 +57,7 @@ var PFmigrator =
 
                     for(var i = 0; i < resp.proclog.length; i++)
                     {
-                        var liel = Element('li', {text: resp.proclog[i]}).inject(ullog, 'before');
+                        var liel = Element('li', {text: resp.proclog[i]}).inject(ullog, 'top');
                     }
                 }
 
@@ -65,21 +65,40 @@ var PFmigrator =
                     // Set status to success
                     jstat.removeClass('label-info');
                     jstat.addClass('label-success');
-                    jstat.set('text', 'Updating');
+                    jstat.set('text', opt.txt_upd);
 
-                    if ($('jform_stop').val() == '0') {
-                        setTimeout("PFmigrator.process()", 1000);
+                    if (resp.success == true) {
+                        setTimeout("PFmigrator.process(" + JSON.encode(opt) + ")", 1000);
                     }
                     else {
                         $('jform_prgcontainer').removeClass('active');
                         $('jform_prgcontainer').removeClass('progress-striped');
-                        jstat.set('text', 'Complete');
+                        jstat.set('text', opt.txt_err);
                     }
                 }
                 else {
                     $('jform_prgcontainer').removeClass('active');
                     $('jform_prgcontainer').removeClass('progress-striped');
-                    jstat.set('text', 'Complete');
+                    jstat.set('text', opt.txt_cpl);
+
+                    var cproc = parseInt($('jform_process').value);
+                    var procs = parseInt($('jform_processes').value);
+
+                    // Go to next process
+                    if (procs - 1 > cproc) {
+                        $('jform_process').set('value', cproc + 1);
+                        $('jform_total').set('value', 0);
+                        $('jform_limitstart').set('value', 0);
+
+                        $('progress_bar').setStyle('width', '0%');
+                        $('progress_label').set('text', '0%');
+
+                        $('proc_' + cproc).removeClass('proc-active');
+                        $('proc_' + cproc).addClass('proc-done');
+                        $('proc_' + (cproc + 1)).addClass('proc-active');
+
+                        setTimeout("PFmigrator.process(" + JSON.encode(opt) + ")", 1000);
+                    }
                 }
             },
             onFailure: function(resp)
@@ -96,13 +115,13 @@ var PFmigrator =
             },
             onException: function(headerName, value)
             {
-                console.log('Request failed [exception]...');
+                console.log('Request exception...');
                 console.log(headerName);
 
                 jstat.removeClass('label-success');
                 jstat.removeClass('label-info');
                 jstat.addClass('label-important');
-                jstat.set('text', 'Error: ' + headerName + ': ' + value);
+                jstat.set('text', opt.txt_err + ': ' + headerName + ': ' + value);
 
                 PFmigrator.displayMsg(headerName, value);
             },
@@ -116,7 +135,7 @@ var PFmigrator =
 
                     if (!jstat.hasClass('label-important')) {
                         jstat.removeClass('label-important');
-                        jstat.set('text', 'Idle');
+                        jstat.set('text', opt.txt_idle);
                     }
                 }
             },
@@ -125,42 +144,12 @@ var PFmigrator =
                 console.log('Starting request...');
 
                 if (lsint < tint) {
-                    jstat.set('text', 'Processing');
+                    jstat.set('text', opt.txt_proc);
                     jstat.removeClass('label-success');
                     jstat.addClass('label-info');
                 }
             }
         }).send();
-
-        /*rq.done(function(resp)
-        {
-            if (CscMigrateOrders.isJsonString(resp) == false) {
-                CscMigrateOrders.displayException(resp);
-            }
-            else {
-                resp = jQuery.parseJSON(resp);
-
-                // Get integer values
-                var lsint = parseInt(resp.limitstart);
-                var tint  = parseInt(total);
-
-                if (lsint < tint) {
-                    if (jQuery('#jform_stop').val() == '0') {
-                        setTimeout("CscMigrateOrders.process()", 1000);
-                    }
-                    else {
-                        jQuery('#jform_prgcontainer').removeClass('active');
-                        jQuery('#jform_prgcontainer').removeClass('progress-striped');
-                        jstat.text('Complete');
-                    }
-                }
-                else {
-                    jQuery('#jform_prgcontainer').removeClass('active');
-                    jQuery('#jform_prgcontainer').removeClass('progress-striped');
-                    jstat.text('Complete');
-                }
-            }
-        });*/
     },
 
     displayMsg: function(resp, err)
@@ -184,17 +173,17 @@ var PFmigrator =
                 if (l > 0) {
                     for (x = 0; x < l; x++)
                     {
-                        mc.append('<div class="alert alert-' + msg_class + '"><a class="close" data-dismiss="alert" href="#">×</a>' + resp.messages[x] + '</div>');
+                        var liel = Element('div', {text: resp.messages[x]}).inject(mc, 'top');
                     }
                 }
             }
         }
         else {
             if (typeof err != 'undefined') {
-                mc.append('<div class="alert alert-error"><a class="close" data-dismiss="alert" href="#">×</a>' + err + '</div>');
+                var liel = Element('div', {text: err}).inject(mc, 'top');
             }
             else {
-                mc.append('<div class="alert alert-error"><a class="close" data-dismiss="alert" href="#">×</a>Request failed!</div>');
+                var liel = Element('div', {text: 'Request failed!'}).inject(mc, 'top');
             }
         }
     },
@@ -208,7 +197,7 @@ var PFmigrator =
             alert(msg);
         }
         else {
-            mc.append(msg);
+            var liel = Element('div', {text: msg}).inject(mc, 'top');
         }
     }
 }

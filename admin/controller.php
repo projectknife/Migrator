@@ -43,4 +43,58 @@ class PFmigratorController extends JControllerLegacy
 
         return $this;
     }
+
+
+    public function process()
+    {
+        $app  = JFactory::getApplication();
+        $json = array();
+        $ls   = JRequest::getUInt('limitstart', 0);
+        $proc = JRequest::getUInt('process', 0);
+
+        // Process request
+        $model = JModelLegacy::getInstance('Migrate', 'PFmigratorModel');
+        $model->setProcess($proc);
+        $model->process($ls);
+
+        // Prepare response
+        $json['limitstart'] = $ls;
+        $json['process']    = $proc;
+        $json['success']    = $model->getSuccess();
+        $json['limit']      = $model->getLimit();
+        $json['total']      = $model->getTotal();
+        $json['proclog']    = $model->getLog();
+
+        $next  = ($json['limitstart'] + $json['limit']);
+
+        if ($next > $json['total']) $next = $json['total'];
+
+        $json['limitstart'] = $next;
+
+        $this->sendJSON($json);
+    }
+
+
+    protected function sendJSON($data)
+    {
+        // Set the MIME type for JSON output.
+        JFactory::getDocument()->setMimeEncoding('application/json');
+
+        // Change the suggested filename.
+        JResponse::setHeader('Content-Disposition', 'attachment;filename="migrate.json"');
+
+        foreach($data AS $key => $value)
+        {
+            if (is_array($value)) {
+                if (count($value) == 0) {
+                    unset($data[$key]);
+                }
+            }
+        }
+
+        // Output the JSON data.
+        echo json_encode($data);
+
+        jexit();
+    }
 }

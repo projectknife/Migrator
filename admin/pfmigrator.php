@@ -19,6 +19,8 @@ if (!JFactory::getUser()->authorise('core.admin')) {
 jimport('joomla.application.component.controller');
 jimport('joomla.application.component.helper');
 
+require_once JPATH_ADMINISTRATOR . '/components/com_pfmigrator/helpers/pfmigrator.php';
+
 $controller = JControllerLegacy::getInstance('PFmigrator');
 $controller->execute(JFactory::getApplication()->input->get('task'));
 $controller->redirect();
