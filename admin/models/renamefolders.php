@@ -44,10 +44,12 @@ class PFmigratorModelRenameFolders extends JModelList
 
         // Check if the destination folder exists
         if(JFolder::exists($target_folder . '3')) {
-            $this->success = false;
-            $this->log[] = JText::sprintf('COM_PFMIGRATOR_FOLDER_EXISTS', $path . '3');
+            if (!JFolder::delete($target_folder . '3')) {
+                $this->success = false;
+                $this->log[] = JText::sprintf('COM_PFMIGRATOR_FOLDER_EXISTS', $path . '3');
 
-            return false;
+                return false;
+            }
         }
 
         if (!JFolder::move($target_folder, $target_folder . '3')) {

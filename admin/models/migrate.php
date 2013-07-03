@@ -99,6 +99,22 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 7. Milestones migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES');
+        $item['model']  = 'milestones';
+        $item['active'] = false;
+
+        $items[] = $item;
+
+        // 8. Tasks migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS');
+        $item['model']  = 'tasks';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

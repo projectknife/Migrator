@@ -48,9 +48,14 @@ class PFmigratorModelRenameTables extends JModelList
 
         // Check if the tmp table exists
         if (in_array($target_table . '_tmp', $tables)) {
-            $this->log[] = JText::sprintf('COM_PFMIGRATOR_TMP_TABLE_EXISTS', $target_table . '_tmp');
+            // Try to delete it
+            $this->_db->setQuery('DROP TABLE ' . $target_table . '_tmp');
 
-            return true;
+            if (!$this->_db->execute()) {
+                // Skip it on error
+                $this->log[] = JText::sprintf('COM_PFMIGRATOR_TMP_TABLE_EXISTS', $target_table . '_tmp');
+                return true;
+            }
         }
 
         $this->_db->setQuery('RENAME TABLE ' . $target_table . ' TO ' . $target_table . '_tmp');

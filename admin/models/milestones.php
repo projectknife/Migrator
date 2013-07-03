@@ -11,15 +11,13 @@ defined('_JEXEC') or die();
 
 
 jimport('joomla.application.component.modellist');
-jimport('joomla.filesystem.file');
-jimport('joomla.filesystem.folder');
 
 
 /**
- * Projects migration model
+ * Milestones migration model
  *
  */
-class PFmigratorModelProjects extends JModelList
+class PFmigratorModelMilestones extends JModelList
 {
     protected $log     = array();
     protected $success = true;
@@ -28,13 +26,13 @@ class PFmigratorModelProjects extends JModelList
     public function process($limitstart = 0)
     {
         $config = JFactory::getConfig();
-
         $this->access = $config->get('access', 1);
 
         $query = $this->_db->getQuery(true);
-        $query->select('*')
-              ->from('#__pf_projects_tmp')
-              ->order('id ASC');
+        $query->select('a.*, p.state, p.access')
+              ->from('#__pf_milestones_tmp AS a')
+              ->join('left', '#__pf_projects AS p ON p.id = a.project')
+              ->order('a.id ASC');
 
         $limit = $this->getLimit();
 
@@ -55,7 +53,7 @@ class PFmigratorModelProjects extends JModelList
         }
 
         $projects = implode(', ', $titles);
-        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_PROJECTS_SUCCESS', $projects);
+        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_MILESTONES_SUCCESS', $projects);
 
         return true;
     }
@@ -66,7 +64,7 @@ class PFmigratorModelProjects extends JModelList
         $query = $this->_db->getQuery(true);
 
         $query->select('COUNT(*)')
-              ->from('#__pf_projects_tmp');
+              ->from('#__pf_milestones_tmp');
 
         $this->_db->setQuery($query);
         $total = (int) $this->_db->loadResult();
@@ -77,7 +75,7 @@ class PFmigratorModelProjects extends JModelList
 
     public function getLimit()
     {
-        return 10;
+        return 20;
     }
 
 
@@ -103,8 +101,10 @@ class PFmigratorModelProjects extends JModelList
         $obj->alias       = JApplication::stringURLSafe($row->title);
         $obj->description = $row->content;
         $obj->created_by  = $row->author;
-        $obj->state       = 1;
-        $obj->access      = $this->access;
+        $obj->state       = $row->state;
+        $obj->access      = ($row->access ? $row->access : $this->access);
+        $obj->ordering    = $row->ordering;
+        $obj->project_id  = $row->project;
 
         // Set creation date
         if ($row->cdate) {
@@ -119,23 +119,11 @@ class PFmigratorModelProjects extends JModelList
             $obj->end_date = $date->toSql();
         }
 
-        // Set state
-        if ($row->archived) {
-            $obj->state = 2;
-        }
-        elseif (!$row->approved) {
-            $obj->state = 0;
-        }
-
         // Set attribs
-        $obj->attribs = array();
-        $obj->attribs['website'] = $row->website;
-        $obj->attribs['email']   = $row->email;
-
-        $obj->attribs = json_encode($obj->attribs);
+        $obj->attribs = '{}';
 
         // Store base item
-        if (!$this->_db->insertObject('#__pf_projects', $obj)) {
+        if (!$this->_db->insertObject('#__pf_milestones', $obj)) {
             $this->success = false;
             $this->log[] = $this->_db->getError();
             return false;
@@ -146,7 +134,7 @@ class PFmigratorModelProjects extends JModelList
         $parent = $this->getParentAsset();
         $asset  = JTable::getInstance('Asset', 'JTable', array('dbo' => $this->_db));
 
-        $asset->loadByName('com_pfprojects.project.' . $row->id);
+        $asset->loadByName('com_pfmilestones.milestone.' . $row->id);
 
         // Check for an error.
         if ($error = $asset->getError()) {
@@ -159,7 +147,7 @@ class PFmigratorModelProjects extends JModelList
 
             // Prepare the asset to be stored.
             $asset->parent_id = $parent;
-            $asset->name      = 'com_pfprojects.project.' . $row->id;
+            $asset->name      = 'com_pfmilestones.milestone.' . $row->id;
             $asset->title     = $row->title;
             $asset->rules     = '{}';
 
@@ -169,7 +157,7 @@ class PFmigratorModelProjects extends JModelList
             else {
                 $query = $this->_db->getQuery(true);
 
-                $query->update('#__pf_projects')
+                $query->update('#__pf_milestones')
                       ->set('asset_id = ' . (int) $asset->id)
                       ->where('id = ' . (int) $row->id);
 
@@ -181,60 +169,7 @@ class PFmigratorModelProjects extends JModelList
             }
         }
 
-        // Move the logo
-        if ($row->logo) {
-            $tmp_path = $this->getLogoPath();
-
-            if ($tmp_path) {
-                $tmp_logo = null;
-
-                if (JFile::exists($tmp_path . $row->logo)) {
-                    $tmp_logo = $tmp_path . $row->logo;
-                }
-                elseif (JFile::exists($tmp_path . '/' . $row->logo)) {
-                    $tmp_logo = $tmp_path . '/' . $row->logo;
-                }
-
-                if ($tmp_logo) {
-                    $ext  = strtolower(JFile::getExt($row->logo));
-                    $dest = JPATH_SITE . '/media/com_projectfork/repo/0/logo/' . $row->id . '.' . $ext;
-
-                    if (!JFile::move($tmp_logo, $dest)) {
-                        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MOVE_PROJECT_LOGO_FAILED', $row->title);
-                    }
-                }
-            }
-        }
-
         return true;
-    }
-
-
-    protected function getLogoPath()
-    {
-        static $path = null;
-
-        if (!is_null($path)) return $path;
-
-        $cfg_path = PFmigratorHelper::getConfig('logo_save_path', 'projects');
-
-        if (empty($cfg_path)) {
-            $path = false;
-            return $path;
-        }
-
-        if (JFolder::exists(JPATH_SITE . $cfg_path)) {
-            $path = JPATH_SITE . $cfg_path;
-            return $path;
-        }
-        elseif (JFolder::exists(JPATH_SITE . '/' . $cfg_path)) {
-            $path = JPATH_SITE . '/' . $cfg_path;
-            return $path;
-        }
-        else {
-            $path = false;
-            return $path;
-        }
     }
 
 
@@ -248,7 +183,7 @@ class PFmigratorModelProjects extends JModelList
 
         $query->select('id')
               ->from('#__assets')
-              ->where('name = ' . $this->_db->quote('com_pfprojects'));
+              ->where('name = ' . $this->_db->quote('com_pfmilestones'));
 
         $this->_db->setQuery($query);
         $parent = (int) $this->_db->loadResult();
