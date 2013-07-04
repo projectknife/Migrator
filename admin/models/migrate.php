@@ -115,6 +115,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 9. Forum migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM');
+        $item['model']  = 'forum';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

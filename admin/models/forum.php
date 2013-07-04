@@ -14,10 +14,10 @@ jimport('joomla.application.component.modellist');
 
 
 /**
- * Tasks migration model
+ * Forum migration model
  *
  */
-class PFmigratorModelTasks extends JModelList
+class PFmigratorModelForum extends JModelList
 {
     protected $log     = array();
     protected $success = true;
@@ -30,7 +30,7 @@ class PFmigratorModelTasks extends JModelList
 
         $query = $this->_db->getQuery(true);
         $query->select('a.*, p.state, p.access')
-              ->from('#__pf_tasks_tmp AS a')
+              ->from('#__pf_topics_tmp AS a')
               ->join('left', '#__pf_projects AS p ON p.id = a.project')
               ->order('a.id ASC');
 
@@ -53,7 +53,7 @@ class PFmigratorModelTasks extends JModelList
         }
 
         $projects = implode(', ', $titles);
-        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_MILESTONES_SUCCESS', $projects);
+        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_FORUM_SUCCESS', $projects);
 
         return true;
     }
@@ -64,7 +64,7 @@ class PFmigratorModelTasks extends JModelList
         $query = $this->_db->getQuery(true);
 
         $query->select('COUNT(*)')
-              ->from('#__pf_tasks_tmp');
+              ->from('#__pf_topics_tmp');
 
         $this->_db->setQuery($query);
         $total = (int) $this->_db->loadResult();
@@ -75,7 +75,7 @@ class PFmigratorModelTasks extends JModelList
 
     public function getLimit()
     {
-        return 20;
+        return 10;
     }
 
 
@@ -103,53 +103,19 @@ class PFmigratorModelTasks extends JModelList
         $obj->created_by   = $row->author;
         $obj->state        = $row->state;
         $obj->access       = ($row->access ? $row->access : $this->access);
-        $obj->ordering     = $row->ordering;
-        $obj->priority     = $row->priority;
-        $obj->milestone_id = $row->milestone;
         $obj->project_id   = $row->project;
 
         // Set creation date
         if ($row->cdate) {
             $date = new JDate($row->cdate);
-            $obj->created    = $date->toSql();
-            $obj->start_date = $obj->created;
-        }
-
-        // Set end date
-        if ($row->edate) {
-            $date = new JDate($row->edate);
-            $obj->end_date = $date->toSql();
-        }
-
-        // Set state
-        if ($row->archived) {
-            $obj->state = 2;
-        }
-        elseif (!$row->approved) {
-            $obj->state = 0;
-        }
-
-        // Set the progress
-        if ($row->progress >= 100) {
-            $obj->complete = 1;
-
-            if ($row->mdate) {
-                $date = new JDate($row->mdate);
-                $obj->completed = $date->toSql();
-            }
-            elseif (isset($obj->end_date)) {
-                $obj->completed = $obj->end_date;
-            }
-            elseif (isset($obj->created)) {
-                $obj->completed = $obj->created;
-            }
+            $obj->created = $date->toSql();
         }
 
         // Set attribs
         $obj->attribs = '{}';
 
         // Store base item
-        if (!$this->_db->insertObject('#__pf_tasks', $obj)) {
+        if (!$this->_db->insertObject('#__pf_topics', $obj)) {
             $this->success = false;
             $this->log[] = $this->_db->getError();
             return false;
@@ -160,7 +126,7 @@ class PFmigratorModelTasks extends JModelList
         $parent = $this->getParentAsset();
         $asset  = JTable::getInstance('Asset', 'JTable', array('dbo' => $this->_db));
 
-        $asset->loadByName('com_pftasks.task.' . $row->id);
+        $asset->loadByName('com_pfforum.topic.' . $row->id);
 
         // Check for an error.
         if ($error = $asset->getError()) {
@@ -173,7 +139,7 @@ class PFmigratorModelTasks extends JModelList
 
             // Prepare the asset to be stored.
             $asset->parent_id = $parent;
-            $asset->name      = 'com_pftasks.task.' . $row->id;
+            $asset->name      = 'com_pfforum.topic.' . $row->id;
             $asset->title     = $row->title;
             $asset->rules     = '{}';
 
@@ -183,7 +149,7 @@ class PFmigratorModelTasks extends JModelList
             else {
                 $query = $this->_db->getQuery(true);
 
-                $query->update('#__pf_tasks')
+                $query->update('#__pf_topics')
                       ->set('asset_id = ' . (int) $asset->id)
                       ->where('id = ' . (int) $row->id);
 
@@ -195,29 +161,95 @@ class PFmigratorModelTasks extends JModelList
             }
         }
 
-        // Assign users
+        // Migrate replies
         $query = $this->_db->getQuery(true);
 
-        $query->select('user_id')
-              ->from('#__pf_task_users_tmp')
-              ->where('task_id = ' . (int) $row->id);
+        $query->select('a.*, p.state, p.access')
+              ->from('#__pf_topic_replies_tmp AS a')
+              ->where('a.topic = ' . $row->id)
+              ->join('left', '#__pf_projects AS p ON p.id = a.project')
+              ->order('a.id ASC');
 
         $this->_db->setQuery($query);
-        $users = $this->_db->loadColumn();
+        $replies = $this->_db->loadObjectList();
 
-        if (empty($users) || !is_array($users)) $users = array();
+        if (empty($replies) || !is_array($replies)) $replies = array();
 
-        foreach ($users AS $uid)
+        foreach ($replies AS $reply)
         {
-            $obj = new stdClass();
+            $this->migrateReply($reply);
+        }
 
-            $obj->id        = null;
-            $obj->item_type = 'com_pftasks.task';
-            $obj->item_id   = $row->id;
-            $obj->user_id   = $uid;
+        return true;
+    }
 
-            if (!$this->_db->insertObject('#__pf_ref_users', $obj)) {
-                $this->log[] = $this->_db->getError();
+
+    protected function migrateReply($row)
+    {
+        $nd  = $this->_db->getNullDate();
+        $obj = new stdClass();
+
+        $obj->id           = $row->id;
+        $obj->title        = $row->title;
+        $obj->alias        = JApplication::stringURLSafe($row->title);
+        $obj->description  = $row->content;
+        $obj->created_by   = $row->author;
+        $obj->state        = $row->state;
+        $obj->access       = ($row->access ? $row->access : $this->access);
+        $obj->project_id   = $row->project;
+        $obj->topic_id     = $row->topic;
+
+        // Set creation date
+        if ($row->cdate) {
+            $date = new JDate($row->cdate);
+            $obj->created = $date->toSql();
+        }
+
+        // Set attribs
+        $obj->attribs = '{}';
+
+        // Store base item
+        if (!$this->_db->insertObject('#__pf_replies', $obj)) {
+            $this->log[] = $this->_db->getError();
+        }
+
+        // Create asset
+        $nulls  = false;
+        $parent = $this->getParentReplyAsset($row->topic);
+        $asset  = JTable::getInstance('Asset', 'JTable', array('dbo' => $this->_db));
+
+        $asset->loadByName('com_pfforum.reply.' . $row->id);
+
+        // Check for an error.
+        if ($error = $asset->getError()) {
+            $this->log[] = $error;
+        }
+        else {
+            if (empty($asset->id)) {
+                $asset->setLocation($parent, 'last-child');
+            }
+
+            // Prepare the asset to be stored.
+            $asset->parent_id = $parent;
+            $asset->name      = 'com_pfforum.reply.' . $row->id;
+            $asset->title     = $row->title;
+            $asset->rules     = '{}';
+
+            if (!$asset->check() || !$asset->store($nulls)) {
+                $this->log[] = $asset->getError();
+            }
+            else {
+                $query = $this->_db->getQuery(true);
+
+                $query->update('#__pf_replies')
+                      ->set('asset_id = ' . (int) $asset->id)
+                      ->where('id = ' . (int) $row->id);
+
+                $this->_db->setQuery($query);
+
+                if (!$this->_db->execute()) {
+                    $this->log[] = JText::sprintf('JLIB_DATABASE_ERROR_STORE_FAILED_UPDATE_ASSET_ID', $this->_db->getErrorMsg());
+                }
             }
         }
 
@@ -235,12 +267,33 @@ class PFmigratorModelTasks extends JModelList
 
         $query->select('id')
               ->from('#__assets')
-              ->where('name = ' . $this->_db->quote('com_pftasks'));
+              ->where('name = ' . $this->_db->quote('com_pfforum'));
 
         $this->_db->setQuery($query);
         $parent = (int) $this->_db->loadResult();
 
         if (!$parent) $parent = 1;
+
+        return $parent;
+    }
+
+
+    protected function getParentReplyAsset($id = 0)
+    {
+        static $parent = null;
+
+        if (!is_null($parent)) return $parent;
+
+        $query = $this->_db->getQuery(true);
+
+        $query->select('id')
+              ->from('#__assets')
+              ->where('name = ' . $this->_db->quote('com_pfforum.topic.' . $id));
+
+        $this->_db->setQuery($query);
+        $parent = (int) $this->_db->loadResult();
+
+        if (!$parent) $parent = $this->getParentAsset();
 
         return $parent;
     }
