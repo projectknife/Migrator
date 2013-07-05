@@ -123,6 +123,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 10. Time sheet migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME');
+        $item['model']  = 'time';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)
