@@ -131,6 +131,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 11. Time sheet migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO');
+        $item['model']  = 'preprepo';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

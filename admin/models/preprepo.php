@@ -67,15 +67,17 @@ class PFmigratorModelPrepRepo extends JModelList
             $this->_db->setQuery($query, 0, 1);
             $params = $this->_db->loadResult();
 
-            $base_path = str_replace(JPATH_SITE . '/', $path, '');
+            $base_path = str_replace(JPATH_SITE . '/', '', $path);
 
             $registry = new JRegistry();
             $registry->loadString($params);
             $registry->set('repo_basepath', $base_path);
 
+            $attribs = strval($registry);
+
             $query->clear();
             $query->update('#__extensions')
-                  ->set($this->_db->quoteName('params') . ' = ' . $db->quote(strval($registry)))
+                  ->set($this->_db->quoteName('params') . ' = ' . $this->_db->quote($attribs))
                   ->where($this->_db->quoteName('type') . ' = ' . $this->_db->quote('component'))
                   ->where($this->_db->quoteName('element') . ' = ' . $this->_db->quote('com_pfrepo'));
 
@@ -228,7 +230,7 @@ class PFmigratorModelPrepRepo extends JModelList
         $query = $this->_db->getQuery(true);
 
         $query->update('#__pf_projects')
-              ->set('attribs = ' . strval($registry))
+              ->set('attribs = ' . $this->_db->quote(strval($registry)))
               ->where('id = ' . (int) $row->id);
 
         $this->_db->setQuery($query);
@@ -249,7 +251,7 @@ class PFmigratorModelPrepRepo extends JModelList
         $exists = (int) $this->_db->loadResult($tbl->id);
 
         if ($exists) {
-            $new_id = $this->getNewId();
+            $new_id = $this->getNewId($tbl->id);
 
             if (!$new_id) return false;
 
@@ -381,6 +383,13 @@ class PFmigratorModelPrepRepo extends JModelList
             $this->log[] = $this->_db->getError();
             return false;
         }
+
+        $query = $this->_db->getQuery(true);
+        $query->delete('#__pf_folders_tmp')
+              ->where('id = ' . $obj->id);
+
+        $this->_db->setQuery($query);
+        $this->_db->execute();
 
         return $obj->id;
     }
