@@ -99,7 +99,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 7. Milestones migration
+        // 8. Milestones migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES');
         $item['model']  = 'milestones';
@@ -107,7 +107,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 8. Tasks migration
+        // 9. Tasks migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS');
         $item['model']  = 'tasks';
@@ -115,7 +115,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 9. Forum migration
+        // 10. Forum migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM');
         $item['model']  = 'forum';
@@ -123,7 +123,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 10. Time sheet migration
+        // 11. Time sheet migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME');
         $item['model']  = 'time';
@@ -131,10 +131,18 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 11. Time sheet migration
+        // 12. Prepare repo
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO');
         $item['model']  = 'preprepo';
+        $item['active'] = false;
+
+        $items[] = $item;
+
+        // 13. Migrate folders
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPODIRS');
+        $item['model']  = 'repodirs';
         $item['active'] = false;
 
         $items[] = $item;

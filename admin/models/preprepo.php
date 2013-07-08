@@ -29,6 +29,7 @@ class PFmigratorModelPrepRepo extends JModelList
 
     public function process($limitstart = 0)
     {
+
         $config = JFactory::getConfig();
 
         $this->access = $config->get('access', 1);
@@ -88,6 +89,8 @@ class PFmigratorModelPrepRepo extends JModelList
                 $this->log[] = $this->_db->getError();
                 return false;
             }
+
+            if (!$this->freeRoot()) return false;
         }
 
         // Create repo base dirs
@@ -333,6 +336,106 @@ class PFmigratorModelPrepRepo extends JModelList
                 $this->log[] = $this->_db->getError();
                 return false;
             }
+        }
+
+        return true;
+    }
+
+
+    protected function freeRoot()
+    {
+        $query = $this->_db->getQuery(true);
+
+        $query->select('*')
+              ->from('#__pf_folders_tmp')
+              ->where('id = 1');
+
+        $this->_db->setQuery($query);
+        $root = $this->_db->loadObject();
+
+        if (empty($root)) return true;
+
+        $new_id = $this->getNewId(1);
+
+        if (!$new_id) return false;
+
+        $query->clear();
+        $query->update('#__pf_folders_tmp')
+              ->set('id = ' . $new_id)
+              ->where('id = 1');
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
+        $query->clear();
+        $query->update('#__pf_folder_tree_tmp')
+              ->set('folder_id = ' . $new_id)
+              ->where('folder_id = 1');
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
+        $query->clear();
+        $query->update('#__pf_folder_tree_tmp')
+              ->set('parent_id = ' . $new_id)
+              ->where('parent_id = 1');
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
+        $query->clear();
+        $query->update('#__pf_files_tmp')
+              ->set('dir = ' . $new_id)
+              ->where('dir = 1');
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
+        $query->clear();
+        $query->update('#__pf_notes_tmp')
+              ->set('dir = ' . $new_id)
+              ->where('dir = 1');
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
+        $query->clear();
+        $query->update('#__pf_task_attachments_tmp')
+              ->set('attach_id = ' . $new_id)
+              ->where('attach_id = 1')
+              ->where('attach_type = ' . $this->_db->quote('folder'));
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
         }
 
         return true;
