@@ -96,9 +96,13 @@ class PFmigratorModelTasks extends JModelList
         $nd  = $this->_db->getNullDate();
         $obj = new stdClass();
 
+        $title = $row->title;
+        $alias = JApplication::stringURLSafe($row->title);
+        list($title, $alias) = $this->generateNewTitle($title, $alias, $row->project, $row->milestone);
+
         $obj->id           = $row->id;
-        $obj->title        = $row->title;
-        $obj->alias        = JApplication::stringURLSafe($row->title);
+        $obj->title        = $title;
+        $obj->alias        = $alias;
         $obj->description  = $row->content;
         $obj->created_by   = $row->author;
         $obj->state        = $row->state;
@@ -241,5 +245,92 @@ class PFmigratorModelTasks extends JModelList
         if (!$parent) $parent = 1;
 
         return $parent;
+    }
+
+
+    /**
+     * Method to change the title & alias.
+     * Overloaded from JModelAdmin class
+     *
+     * @param     string     The title
+     * @param     string     The alias
+     * @param     integer    The item id
+     *
+     * @return    array      Contains the modified title and alias
+     */
+    protected function generateNewTitle($title, $alias = '', $project = 0, $milestone = 0, $id = 0)
+    {
+        $query = $this->_db->getQuery(true);
+
+        if (empty($alias)) {
+            $alias = JApplication::stringURLSafe($title);
+
+            if (trim(str_replace('-', '', $alias)) == '') {
+                $alias = JApplication::stringURLSafe(JFactory::getDate()->format('Y-m-d-H-i-s'));
+            }
+        }
+
+        if (trim(str_replace('-', '', $alias)) == '') {
+            $alias = JApplication::stringURLSafe(JFactory::getDate()->format('Y-m-d-H-i-s'));
+        }
+
+        $query->select('COUNT(id)')
+              ->from('#__pf_tasks')
+              ->where('project_id = ' . (int) $project)
+              ->where('milestone_id = ' . (int) $milestone)
+              ->where('alias = ' . $this->_db->quote($alias));
+
+        if ($id) {
+            $query->where('id != ' . intval($id));
+        }
+
+        $this->_db->setQuery($query);
+        $count = (int) $this->_db->loadResult();
+
+        if ($id > 0 && $count == 0) {
+            return array($title, $alias);
+        }
+        elseif ($id == 0 && $count == 0) {
+            return array($title, $alias);
+        }
+        else {
+            while ($this->aliasExists($project, $milestone, $alias))
+            {
+                $m = null;
+
+                if (preg_match('#-(\d+)$#', $alias, $m)) {
+                    $alias = preg_replace('#-(\d+)$#', '-'.($m[1] + 1).'', $alias);
+                }
+                else {
+                    $alias .= '-2';
+                }
+
+                if (preg_match('#\((\d+)\)$#', $title, $m)) {
+                    $title = preg_replace('#\(\d+\)$#', '('.($m[1] + 1).')', $title);
+                }
+                else {
+                    $title .= ' (2)';
+                }
+            }
+        }
+
+        return array($title, $alias);
+    }
+
+
+    protected function aliasExists($project = 0, $milestone = 0, $alias = '')
+    {
+        $query = $this->_db->getQuery(true);
+
+        $query->select('id')
+              ->from('#__pf_tasks')
+              ->where('project_id = ' . (int) $project)
+              ->where('milestone_id = ' . (int) $milestone)
+              ->where('alias = ' . $this->_db->quote($alias));
+
+        $this->_db->setQuery($query, 0, 1);
+        $result = (int) $this->_db->loadResult();
+
+        return ($result > 0 ? true : false);
     }
 }
