@@ -299,7 +299,16 @@ class PFmigratorModelRepoDirs extends JModelList
 
         if (!is_null($path)) return $path;
 
-        $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+        if (PFmigratorHelper::fmProInstalled()) {
+            $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager_pro');
+
+            if (empty($cfg_path)) {
+                $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+            }
+        }
+        else {
+            $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+        }
 
         if (empty($cfg_path)) {
             $path = false;

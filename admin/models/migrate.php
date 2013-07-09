@@ -203,6 +203,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 21. Migrate Designs
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS');
+        $item['model']  = 'designs';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

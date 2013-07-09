@@ -68,7 +68,7 @@ class PFmigratorModelPrepRepo extends JModelList
             $this->_db->setQuery($query, 0, 1);
             $params = $this->_db->loadResult();
 
-            $base_path = str_replace(JPATH_SITE . '/', '', $path);
+            $base_path = str_replace(JPATH_SITE . DS, '', $path);
 
             $registry = new JRegistry();
             $registry->loadString($params);
@@ -448,7 +448,16 @@ class PFmigratorModelPrepRepo extends JModelList
 
         if (!is_null($path)) return $path;
 
-        $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+        if (PFmigratorHelper::fmProInstalled()) {
+            $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager_pro');
+
+            if (empty($cfg_path)) {
+                $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+            }
+        }
+        else {
+            $cfg_path = PFmigratorHelper::getConfig('upload_path', 'filemanager');
+        }
 
         if (empty($cfg_path)) {
             $path = false;

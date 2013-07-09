@@ -27,6 +27,11 @@ class PFmigratorModelInstallDesigns extends JModelList
 
     public function process($limitstart = 0)
     {
+        if (!PFMigratorHelper::designsInstalled()) {
+            $this->log[] = JText::_('COM_PFMIGRATOR_DESIGNS_NOT_INSTALLED');
+            return true;
+        }
+
         require_once JPATH_ADMINISTRATOR . '/components/com_installer/helpers/installer.php';
         JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_installer/models');
 
@@ -82,6 +87,48 @@ class PFmigratorModelInstallDesigns extends JModelList
 
         JInstallerHelper::cleanupInstall($package['packagefile'], $package['extractdir']);
 
+        // Update the config
+        $path = $this->getUploadPath();
+
+        if (!$path) {
+            $this->success = false;
+            $this->log[] = JText::_('COM_PFMIGRATOR_PREPDESIGNS_UPLOAD_DIR_ERROR');
+
+            return false;
+        }
+
+        $query = $this->_db->getQuery(true);
+
+        $query->select($this->_db->quoteName('params'))
+              ->from('#__extensions')
+              ->where($this->_db->quoteName('type') . ' = ' . $this->_db->quote('component'))
+              ->where($this->_db->quoteName('element') . ' = ' . $this->_db->quote('com_pfdesigns'));
+
+        $this->_db->setQuery($query, 0, 1);
+        $params = $this->_db->loadResult();
+
+        $base_path = str_replace(JPATH_SITE . DS, '', $path);
+
+        $registry = new JRegistry();
+        $registry->loadString($params);
+        $registry->set('design_basepath', $base_path);
+
+        $attribs = strval($registry);
+
+        $query->clear();
+        $query->update('#__extensions')
+              ->set($this->_db->quoteName('params') . ' = ' . $this->_db->quote($attribs))
+              ->where($this->_db->quoteName('type') . ' = ' . $this->_db->quote('component'))
+              ->where($this->_db->quoteName('element') . ' = ' . $this->_db->quote('com_pfdesigns'));
+
+        $this->_db->setQuery($query);
+
+        if (!$this->_db->execute()) {
+            $this->success = false;
+            $this->log[] = $this->_db->getError();
+            return false;
+        }
+
         $this->log[] = JText::_('COM_PFMIGRATOR_PKG_DESIGNS_INSTALL_SUCCESS');
 
         return true;
@@ -109,5 +156,38 @@ class PFmigratorModelInstallDesigns extends JModelList
     public function getSuccess()
     {
         return $this->success;
+    }
+
+
+    protected function getUploadPath()
+    {
+        static $path = null;
+
+        if (!is_null($path)) return $path;
+
+        $cfg_path = PFmigratorHelper::getConfig('upload_path', 'design_review');
+
+        if (empty($cfg_path)) {
+            $path = false;
+            return $path;
+        }
+
+        if (substr($cfg_path, 0, 1) != '/' && substr($cfg_path, 0, 1) != '\\') {
+            $cfg_path = '/' . $cfg_path;
+        }
+
+        if (substr($cfg_path, -1) == '/' || substr($cfg_path, -1) == '\\') {
+            $cfg_path = substr($cfg_path, 0, -1);
+        }
+
+        $path = JPath::clean(JPATH_SITE . $cfg_path);
+
+        if (!JFolder::exists($path)) {
+            if (!JFolder::create($path)) {
+                $path = false;
+            }
+        }
+
+        return $path;
     }
 }
