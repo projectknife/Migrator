@@ -14,10 +14,10 @@ jimport('joomla.application.component.modellist');
 
 
 /**
- * Tasks migration model
+ * Repo notes migration model
  *
  */
-class PFmigratorModelTasks extends JModelList
+class PFmigratorModelRepoNotes extends JModelList
 {
     protected $log     = array();
     protected $success = true;
@@ -26,12 +26,13 @@ class PFmigratorModelTasks extends JModelList
     public function process($limitstart = 0)
     {
         $config = JFactory::getConfig();
+
         $this->access = $config->get('access', 1);
 
         $query = $this->_db->getQuery(true);
-        $query->select('a.*, p.state, p.access')
-              ->from('#__pf_tasks_tmp AS a')
-              ->join('left', '#__pf_projects AS p ON p.id = a.project')
+        $query->select('a.*, p.access')
+              ->from('#__pf_notes_tmp AS a')
+              ->join('INNER', '#__pf_projects AS p ON p.id = a.project')
               ->order('a.id ASC');
 
         $limit = $this->getLimit();
@@ -52,8 +53,8 @@ class PFmigratorModelTasks extends JModelList
             $titles[] = $row->title;
         }
 
-        $projects = implode(', ', $titles);
-        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_TASKS_SUCCESS', $projects);
+        $titles = implode(', ', $titles);
+        $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_REPO_NOTES_SUCCESS', $titles);
 
         return true;
     }
@@ -64,7 +65,7 @@ class PFmigratorModelTasks extends JModelList
         $query = $this->_db->getQuery(true);
 
         $query->select('COUNT(*)')
-              ->from('#__pf_tasks_tmp');
+              ->from('#__pf_notes_tmp');
 
         $this->_db->setQuery($query);
         $total = (int) $this->_db->loadResult();
@@ -93,65 +94,39 @@ class PFmigratorModelTasks extends JModelList
 
     protected function migrate($row)
     {
+        if (!$row->dir) {
+            $row->dir = $this->getProjectRepo($row->project);
+        }
+
+        if (!$row->dir) return true;
+
         $nd  = $this->_db->getNullDate();
         $obj = new stdClass();
 
         $title = $row->title;
         $alias = JApplication::stringURLSafe($row->title);
-        list($title, $alias) = $this->generateNewTitle($title, $alias, $row->project, $row->milestone);
+        list($title, $alias) = $this->generateNewTitle($title, $alias, $row->dir);
 
-        $obj->id           = $row->id;
-        $obj->title        = $title;
-        $obj->alias        = $alias;
-        $obj->description  = $row->content;
-        $obj->created_by   = $row->author;
-        $obj->state        = $row->state;
-        $obj->access       = ($row->access ? $row->access : $this->access);
-        $obj->ordering     = $row->ordering;
-        $obj->priority     = $row->priority;
-        $obj->milestone_id = $row->milestone;
-        $obj->project_id   = $row->project;
+        $obj->id          = $row->id;
+        $obj->title       = $title;
+        $obj->alias       = $alias;
+        $obj->description = $row->content;
+        $obj->created_by  = $row->author;
+        $obj->access      = ($row->access ? $row->access : $this->access);
+        $obj->project_id  = $row->project;
+        $obj->dir_id      = $row->dir;
 
         // Set creation date
         if ($row->cdate) {
             $date = new JDate($row->cdate);
-            $obj->created    = $date->toSql();
-            $obj->start_date = $obj->created;
-        }
-
-        // Set start date
-        if ($row->sdate) {
-            $date = new JDate($row->sdate);
-            $obj->start_date = $date->toSql();
-        }
-
-        // Set end date
-        if ($row->edate) {
-            $date = new JDate($row->edate);
-            $obj->end_date = $date->toSql();
-        }
-
-        // Set the progress
-        if ($row->progress >= 100) {
-            $obj->complete = 1;
-
-            if ($row->mdate) {
-                $date = new JDate($row->mdate);
-                $obj->completed = $date->toSql();
-            }
-            elseif (isset($obj->end_date)) {
-                $obj->completed = $obj->end_date;
-            }
-            elseif (isset($obj->created)) {
-                $obj->completed = $obj->created;
-            }
+            $obj->created = $date->toSql();
         }
 
         // Set attribs
         $obj->attribs = '{}';
 
         // Store base item
-        if (!$this->_db->insertObject('#__pf_tasks', $obj)) {
+        if (!$this->_db->insertObject('#__pf_repo_notes', $obj)) {
             $this->success = false;
             $this->log[] = $this->_db->getError();
             return false;
@@ -159,10 +134,10 @@ class PFmigratorModelTasks extends JModelList
 
         // Create asset
         $nulls  = false;
-        $parent = $this->getParentAsset();
+        $parent = $this->getParentAsset($row->dir);
         $asset  = JTable::getInstance('Asset', 'JTable', array('dbo' => $this->_db));
 
-        $asset->loadByName('com_pftasks.task.' . $row->id);
+        $asset->loadByName('com_pfrepo.note.' . $row->id);
 
         // Check for an error.
         if ($error = $asset->getError()) {
@@ -175,7 +150,7 @@ class PFmigratorModelTasks extends JModelList
 
             // Prepare the asset to be stored.
             $asset->parent_id = $parent;
-            $asset->name      = 'com_pftasks.task.' . $row->id;
+            $asset->name      = 'com_pfrepo.note.' . $row->id;
             $asset->title     = $row->title;
             $asset->rules     = '{}';
 
@@ -185,7 +160,7 @@ class PFmigratorModelTasks extends JModelList
             else {
                 $query = $this->_db->getQuery(true);
 
-                $query->update('#__pf_tasks')
+                $query->update('#__pf_repo_notes')
                       ->set('asset_id = ' . (int) $asset->id)
                       ->where('id = ' . (int) $row->id);
 
@@ -197,37 +172,11 @@ class PFmigratorModelTasks extends JModelList
             }
         }
 
-        // Assign users
-        $query = $this->_db->getQuery(true);
-
-        $query->select('user_id')
-              ->from('#__pf_task_users_tmp')
-              ->where('task_id = ' . (int) $row->id);
-
-        $this->_db->setQuery($query);
-        $users = $this->_db->loadColumn();
-
-        if (empty($users) || !is_array($users)) $users = array();
-
-        foreach ($users AS $uid)
-        {
-            $obj = new stdClass();
-
-            $obj->id        = null;
-            $obj->item_type = 'com_pftasks.task';
-            $obj->item_id   = $row->id;
-            $obj->user_id   = $uid;
-
-            if (!$this->_db->insertObject('#__pf_ref_users', $obj)) {
-                $this->log[] = $this->_db->getError();
-            }
-        }
-
         return true;
     }
 
 
-    protected function getParentAsset()
+    protected function getParentAsset($dir = 0)
     {
         static $parent = null;
 
@@ -237,10 +186,19 @@ class PFmigratorModelTasks extends JModelList
 
         $query->select('id')
               ->from('#__assets')
-              ->where('name = ' . $this->_db->quote('com_pftasks'));
+              ->where('name = ' . $this->_db->quote('com_pfrepo.directory.' . $dir));
 
         $this->_db->setQuery($query);
         $parent = (int) $this->_db->loadResult();
+
+        if (!$parent) {
+            $query->select('id')
+                  ->from('#__assets')
+                  ->where('name = ' . $this->_db->quote('com_pfrepo'));
+
+            $this->_db->setQuery($query);
+            $parent = (int) $this->_db->loadResult();
+        }
 
         if (!$parent) $parent = 1;
 
@@ -258,7 +216,7 @@ class PFmigratorModelTasks extends JModelList
      *
      * @return    array      Contains the modified title and alias
      */
-    protected function generateNewTitle($title, $alias = '', $project = 0, $milestone = 0, $id = 0)
+    protected function generateNewTitle($title, $alias = '', $dir = 0, $id = 0)
     {
         $query = $this->_db->getQuery(true);
 
@@ -275,9 +233,8 @@ class PFmigratorModelTasks extends JModelList
         }
 
         $query->select('COUNT(id)')
-              ->from('#__pf_tasks')
-              ->where('project_id = ' . (int) $project)
-              ->where('milestone_id = ' . (int) $milestone)
+              ->from('#__pf_repo_notes')
+              ->where('dir_id = ' . (int) $dir)
               ->where('alias = ' . $this->_db->quote($alias));
 
         if ($id) {
@@ -294,7 +251,7 @@ class PFmigratorModelTasks extends JModelList
             return array($title, $alias);
         }
         else {
-            while ($this->aliasExists($project, $milestone, $alias))
+            while ($this->aliasExists($dir, $alias))
             {
                 $m = null;
 
@@ -318,19 +275,47 @@ class PFmigratorModelTasks extends JModelList
     }
 
 
-    protected function aliasExists($project = 0, $milestone = 0, $alias = '')
+    protected function aliasExists($dir = 0, $alias = '')
     {
         $query = $this->_db->getQuery(true);
 
         $query->select('id')
-              ->from('#__pf_tasks')
-              ->where('project_id = ' . (int) $project)
-              ->where('milestone_id = ' . (int) $milestone)
+              ->from('#__pf_repo_notes')
+              ->where('dir_id = ' . (int) $dir)
               ->where('alias = ' . $this->_db->quote($alias));
 
         $this->_db->setQuery($query, 0, 1);
         $result = (int) $this->_db->loadResult();
 
         return ($result > 0 ? true : false);
+    }
+
+
+    protected function getProjectRepo($project)
+    {
+        static $cache = array();
+
+        if (isset($cache[$project])) return $cache[$project];
+
+        $query = $this->_db->getQuery(true);
+
+        $query->select('attribs')
+              ->from('#__pf_projects')
+              ->where('id = ' . (int) $project);
+
+        $this->_db->setQuery($query);
+        $params = $this->_db->loadResult();
+
+        if (empty($params)) {
+            $cache[$project] = false;
+            return false;
+        }
+
+        $registry = new JRegistry();
+        $registry->loadString($params);
+
+        $cache[$project] = (int) $registry->get('repo_dir');
+
+        return $cache[$project];
     }
 }

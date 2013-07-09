@@ -147,6 +147,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 14. Migrate notes
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTES');
+        $item['model']  = 'reponotes';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

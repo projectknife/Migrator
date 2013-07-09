@@ -75,7 +75,7 @@ class PFmigratorModelMilestones extends JModelList
 
     public function getLimit()
     {
-        return 20;
+        return 25;
     }
 
 
