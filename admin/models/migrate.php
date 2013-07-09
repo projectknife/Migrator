@@ -163,6 +163,30 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 16. Prepare FM Pro migration
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO');
+        $item['model']  = 'prepfmpro';
+        $item['active'] = false;
+
+        $items[] = $item;
+
+        // 17. Migrate note revisions
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS');
+        $item['model']  = 'reponoterevs';
+        $item['active'] = false;
+
+        $items[] = $item;
+
+        // 18. Migrate file revisions
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS');
+        $item['model']  = 'repofilerevs';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)

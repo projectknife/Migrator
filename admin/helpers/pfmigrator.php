@@ -113,4 +113,26 @@ abstract class PFmigratorHelper
         $db->setQuery($query);
         $db->execute();
     }
+
+
+    public static function fmProInstalled()
+    {
+        static $result = null;
+
+        if (!is_null($result)) return $result;
+
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->select('id')
+              ->from('#__pf_sections_tmp')
+              ->where('name = ' . $db->quote('filemanager_pro'));
+
+        $db->setQuery($query);
+        $id = (int) $db->loadResult();
+
+        $result = ($id > 0 ? true : false);
+
+        return $result;
+    }
 }
