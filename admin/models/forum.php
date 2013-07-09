@@ -284,9 +284,9 @@ class PFmigratorModelForum extends JModelList
 
     protected function getParentReplyAsset($id = 0)
     {
-        static $parent = null;
+        static $cache = array();
 
-        if (!is_null($parent)) return $parent;
+        if (isset($cache[$id])) return $cache[$id];
 
         $query = $this->_db->getQuery(true);
 
@@ -298,6 +298,8 @@ class PFmigratorModelForum extends JModelList
         $parent = (int) $this->_db->loadResult();
 
         if (!$parent) $parent = $this->getParentAsset();
+
+        $cache[$id] = $parent;
 
         return $parent;
     }

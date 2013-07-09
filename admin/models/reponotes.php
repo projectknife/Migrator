@@ -178,9 +178,9 @@ class PFmigratorModelRepoNotes extends JModelList
 
     protected function getParentAsset($dir = 0)
     {
-        static $parent = null;
+        static $cache = array();
 
-        if (!is_null($parent)) return $parent;
+        if (isset($cache[$dir])) return $cache[$dir];
 
         $query = $this->_db->getQuery(true);
 
@@ -192,6 +192,7 @@ class PFmigratorModelRepoNotes extends JModelList
         $parent = (int) $this->_db->loadResult();
 
         if (!$parent) {
+            $query->clear();
             $query->select('id')
                   ->from('#__assets')
                   ->where('name = ' . $this->_db->quote('com_pfrepo'));
@@ -201,6 +202,8 @@ class PFmigratorModelRepoNotes extends JModelList
         }
 
         if (!$parent) $parent = 1;
+
+        $cache[$dir] = $parent;
 
         return $parent;
     }
