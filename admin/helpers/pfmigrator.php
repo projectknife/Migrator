@@ -135,4 +135,26 @@ abstract class PFmigratorHelper
 
         return $result;
     }
+
+
+    public static function designsInstalled()
+    {
+        static $result = null;
+
+        if (!is_null($result)) return $result;
+
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->select('id')
+              ->from('#__pf_sections_tmp')
+              ->where('name = ' . $db->quote('design_review'));
+
+        $db->setQuery($query);
+        $id = (int) $db->loadResult();
+
+        $result = ($id > 0 ? true : false);
+
+        return $result;
+    }
 }
