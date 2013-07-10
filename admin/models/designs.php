@@ -77,7 +77,8 @@ class PFmigratorModelDesigns extends JModelList
         $query = $this->_db->getQuery(true);
 
         $query->select('COUNT(*)')
-              ->from('#__pf_designs_tmp');
+              ->from('#__pf_designs_tmp')
+              ->where('rev_id = 0');
 
         $this->_db->setQuery($query);
         $total = (int) $this->_db->loadResult();
