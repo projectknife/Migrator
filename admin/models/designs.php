@@ -274,6 +274,7 @@ class PFmigratorModelDesigns extends JModelList
         $obj->project_id  = $design->project_id;
         $obj->state       = $design->state;
         $obj->ordering    = $row->rev_num;
+        $obj->parent_id   = $design->id;
 
         // Set creation date
         if ($row->cdate) {
