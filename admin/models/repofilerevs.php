@@ -122,6 +122,25 @@ class PFmigratorModelRepoFileRevs extends JModelList
         $source_file =  $row->prefix . $row->name;
 
         if (!JFile::exists($source_path . '/' . $source_file)) {
+            // Check if this is the current revision
+            $query = $this->_db->getQuery(true);
+
+            $query->select('name, prefix, cdate')
+                  ->from('#__pf_files_tmp')
+                  ->where('id = ' . (int) $row->file_id);
+
+            $this->_db->setQuery($query);
+            $pfile = $this->_db->loadObject();
+
+            if (empty($pfile)) {
+                $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_REPO_FILES_NOTFOUND_ERROR', $source_file, $source_path);
+                return true;
+            }
+
+            if ($pfile->name == $row->name && $pfile->prefix == $row->prefix && $pfile->cdate == $row->cdate) {
+                return true;
+            }
+
             $this->log[] = JText::sprintf('COM_PFMIGRATOR_MIGRATE_REPO_FILES_NOTFOUND_ERROR', $source_file, $source_path);
             return true;
         }
