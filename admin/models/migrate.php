@@ -211,6 +211,14 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
+        // 22. Comments
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_COMMENTS');
+        $item['model']  = 'comments';
+        $item['active'] = false;
+
+        $items[] = $item;
+
 
         // Set active process
         foreach ($items AS $i => $item)
