@@ -27,7 +27,14 @@ $script[] = "txt_upd: '" . JText::_('COM_PFMIGRATOR_STATE_UPDATE') . "'";
 $script[] = "});";
 $script[] = "});";
 
-JFactory::getDocument()->addScriptDeclaration(implode('', $script));
+$cdata = PFmigratorHelper::getCustomData();
+
+if (!$cdata->get('process')) {
+    JFactory::getDocument()->addScriptDeclaration(implode('', $script));
+
+    $cdata->set('process', 1);
+    PFmigratorHelper::setCustomData($cdata);
+}
 ?>
 <form action="<?php echo JRoute::_('index.php?option=com_pfmigrator'); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" autocomplete="off">
     <input type="hidden" name="view" value="migrate" />
@@ -51,6 +58,17 @@ JFactory::getDocument()->addScriptDeclaration(implode('', $script));
                 <hr />
                 <div id="jform_counter">
                     <?php echo $this->loadTemplate('counter'); ?>
+                </div>
+                <div id="jform_progress_done" style="display: none;">
+                    <h3><?php echo JText::_('COM_PFMIGRATOR_COMPLETE');?></h3>
+                    <p><a href="index.php?option=com_projectfork"><?php echo JText::_('COM_PFMIGRATOR_CONTINUE'); ?></a></p>
+                </div>
+                <div id="jform_exception" style="display: none;">
+                    <h3><?php echo JText::_('COM_PFMIGRATOR_EXCEPTION'); ?></h3>
+                    <strong><?php echo JText::_('COM_PFMIGRATOR_RSP'); ?></strong>
+                    <div id="jform_exception_rsp"></div>
+                    <strong><?php echo JText::_('COM_PFMIGRATOR_RSP_ERROR'); ?></strong>
+                    <div id="jform_exception_rsp_err"></div>
                 </div>
             </fieldset>
             <fieldset class="adminform">

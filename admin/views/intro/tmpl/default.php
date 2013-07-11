@@ -35,10 +35,12 @@ Joomla.submitbutton = function(task)
         ?>
         if (passed) {
             $('jform_check_passed').value = '1';
-            Joomla.submitform(task, document.getElementById('adminForm'));
+            if (confirm('<?php echo $this->escape(JText::_('COM_PFMIGRATOR_CONFIRM_MIGRATION'));?>')) {
+                Joomla.submitform(task, document.getElementById('adminForm'));
+            }
         }
         else {
-            alert('<?php echo $this->escape(JText::_('JGLOBAL_VALIDATION_FORM_FAILED'));?>');
+            alert('<?php echo $this->escape(JText::_('COM_PFMIGRATOR_CHECK_FORM'));?>');
         }
     }
 }

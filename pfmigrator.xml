@@ -19,11 +19,11 @@
     </languages>
     <administration>
         <files folder="admin">
+            <folder>_install</folder>
             <folder>controllers</folder>
             <folder>helpers</folder>
             <folder>models</folder>
             <folder>views</folder>
-            <filename>config.xml</filename>
             <filename>controller.php</filename>
             <filename>pfmigrator.php</filename>
         </files>

@@ -38,6 +38,18 @@ class PFmigratorController extends JControllerLegacy
             return $this;
         }
 
+        $data = PFmigratorHelper::getCustomData();
+
+        if ($data->get('run')) {
+            $app->enqueueMessage(JText::_('COM_PFMIGRATOR_WARNING_RERUN'), 'error');
+            $app->redirect('index.php?option=com_pfmigrator&view=intro');
+
+            return $this;
+        }
+
+        $data->set('run', 1);
+        PFmigratorHelper::setCustomData($data);
+
         $app->enqueueMessage(JText::_('COM_PFMIGRATOR_WARNING_NO_LEAVE'));
         $app->redirect('index.php?option=com_pfmigrator&view=migrate');
 

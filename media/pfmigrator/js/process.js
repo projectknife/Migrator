@@ -30,6 +30,9 @@ var PFmigrator =
             cache: false,
             onSuccess: function(resp)
             {
+                console.log('success');
+                console.log(resp);
+
                 // Update hidden form fields
                 $('jform_limitstart').set('value', resp.limitstart);
                 $('jform_total').set('value', resp.total);
@@ -61,20 +64,20 @@ var PFmigrator =
                     }
                 }
 
+                if (resp.success == false) {
+                    $('jform_prgcontainer').removeClass('active');
+                    $('jform_prgcontainer').removeClass('progress-striped');
+                    jstat.set('text', opt.txt_err);
+                    return false;
+                }
+
                 if (lsint < tint) {
                     // Set status to success
                     jstat.removeClass('label-info');
                     jstat.addClass('label-success');
                     jstat.set('text', opt.txt_upd);
 
-                    if (resp.success == true) {
-                        setTimeout("PFmigrator.process(" + JSON.encode(opt) + ")", 1000);
-                    }
-                    else {
-                        $('jform_prgcontainer').removeClass('active');
-                        $('jform_prgcontainer').removeClass('progress-striped');
-                        jstat.set('text', opt.txt_err);
-                    }
+                    setTimeout("PFmigrator.process(" + JSON.encode(opt) + ")", 1000);
                 }
                 else {
                     $('jform_prgcontainer').removeClass('active');
@@ -99,36 +102,25 @@ var PFmigrator =
 
                         setTimeout("PFmigrator.process(" + JSON.encode(opt) + ")", 1000);
                     }
+                    else {
+                        // Migration complete
+                        $('jform_progress').hide();
+                        $('jform_counter').hide();
+                        $('jform_progress_done').show();
+                    }
                 }
             },
-            onFailure: function(resp)
+            onError: function(text, error)
             {
-                console.log('Request failed...');
-                console.log(resp.responseText);
+                $('jform_progress').hide();
+                $('jform_counter').hide();
 
-                jstat.removeClass('label-success');
-                jstat.removeClass('label-info');
-                jstat.addClass('label-important');
-                jstat.set('text', 'Error: ' + resp.responseText);
-
-                PFmigrator.displayMsg(resp.responseText);
-            },
-            onException: function(headerName, value)
-            {
-                console.log('Request exception...');
-                console.log(headerName);
-
-                jstat.removeClass('label-success');
-                jstat.removeClass('label-info');
-                jstat.addClass('label-important');
-                jstat.set('text', opt.txt_err + ': ' + headerName + ': ' + value);
-
-                PFmigrator.displayMsg(headerName, value);
+                $('jform_exception_rsp').set('html', text);
+                $('jform_exception_rsp_err').set('text', error);
+                $('jform_exception').show();
             },
             onComplete: function()
             {
-                console.log('Request complete...');
-
                 if (lsint < tint) {
                     jstat.removeClass('label-info');
                     jstat.removeClass('label-success');
@@ -137,16 +129,6 @@ var PFmigrator =
                         jstat.removeClass('label-important');
                         jstat.set('text', opt.txt_idle);
                     }
-                }
-            },
-            onLoadStart: function()
-            {
-                console.log('Starting request...');
-
-                if (lsint < tint) {
-                    jstat.set('text', opt.txt_proc);
-                    jstat.removeClass('label-success');
-                    jstat.addClass('label-info');
                 }
             }
         }).send();

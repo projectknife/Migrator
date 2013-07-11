@@ -55,6 +55,8 @@ class PFmigratorViewMigrate extends JViewLegacy
             $this->addToolbar();
         }
 
+        JRequest::setVar('hidemainmenu', 1);
+
         // Render
         parent::display($tpl);
     }

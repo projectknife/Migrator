@@ -178,59 +178,64 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 16. Prepare FM Pro migration
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO_DESC');
-        $item['model']  = 'prepfmpro';
-        $item['active'] = false;
+        if (PFMigratorHelper::designsInstalled()) {
+            // 16. Prepare FM Pro migration
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO_DESC');
+            $item['model']  = 'prepfmpro';
+            $item['active'] = false;
 
-        $items[] = $item;
+            $items[] = $item;
 
-        // 17. Migrate note revisions
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS_DESC');
-        $item['model']  = 'reponoterevs';
-        $item['active'] = false;
+            // 17. Migrate note revisions
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS_DESC');
+            $item['model']  = 'reponoterevs';
+            $item['active'] = false;
 
-        $items[] = $item;
+            $items[] = $item;
 
-        // 18. Migrate file revisions
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS_DESC');
-        $item['model']  = 'repofilerevs';
-        $item['active'] = false;
+            // 18. Migrate file revisions
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS_DESC');
+            $item['model']  = 'repofilerevs';
+            $item['active'] = false;
 
-        $items[] = $item;
+            $items[] = $item;
+        }
 
-        // 19. Prepare Designs migration
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS_DESC');
-        $item['model']  = 'prepdesigns';
-        $item['active'] = false;
 
-        $items[] = $item;
+        if (PFMigratorHelper::designsInstalled()) {
+            // 19. Prepare Designs migration
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS_DESC');
+            $item['model']  = 'prepdesigns';
+            $item['active'] = false;
 
-        // 20. Install Designs dummy extension
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS_DESC');
-        $item['model']  = 'installdesigns';
-        $item['active'] = false;
+            $items[] = $item;
 
-        $items[] = $item;
+            // 20. Install Designs dummy extension
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS_DESC');
+            $item['model']  = 'installdesigns';
+            $item['active'] = false;
 
-        // 21. Migrate Designs
-        $item = array();
-        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS');
-        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS_DESC');
-        $item['model']  = 'designs';
-        $item['active'] = false;
+            $items[] = $item;
 
-        $items[] = $item;
+            // 21. Migrate Designs
+            $item = array();
+            $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS');
+            $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS_DESC');
+            $item['model']  = 'designs';
+            $item['active'] = false;
+
+            $items[] = $item;
+        }
 
         // 22. Comments
         $item = array();
