@@ -46,6 +46,7 @@ class PFmigratorModelMigrate extends JModelList
         // 1. Rename PF 3 tables
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_RENAME_TABLES');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_RENAME_TABLES_DESC');
         $item['model']  = 'RenameTables';
         $item['active'] = false;
 
@@ -54,6 +55,7 @@ class PFmigratorModelMigrate extends JModelList
         // 2. Rename PF 3 folders
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_RENAME_FOLDERS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_RENAME_FOLDERS_DESC');
         $item['model']  = 'RenameFolders';
         $item['active'] = false;
 
@@ -62,6 +64,7 @@ class PFmigratorModelMigrate extends JModelList
         // 3. Unregister PF 3
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_UNREG_PF3');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_UNREG_PF3_DESC');
         $item['model']  = 'UnregisterPF';
         $item['active'] = false;
 
@@ -70,6 +73,7 @@ class PFmigratorModelMigrate extends JModelList
         // 4. Install PF 4
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_INSTALL_PF');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_INSTALL_PF_DESC');
         $item['model']  = 'InstallPF';
         $item['active'] = false;
 
@@ -78,6 +82,7 @@ class PFmigratorModelMigrate extends JModelList
         // 5. Migrate projects
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_PROJECTS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_PROJECTS_DESC');
         $item['model']  = 'projects';
         $item['active'] = false;
 
@@ -86,6 +91,7 @@ class PFmigratorModelMigrate extends JModelList
         // 6. Prepare Access migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_ACCESS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_ACCESS_DESC');
         $item['model']  = 'prepaccess';
         $item['active'] = false;
 
@@ -94,6 +100,7 @@ class PFmigratorModelMigrate extends JModelList
         // 7. Access migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_ACCESS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_ACCESS_DESC');
         $item['model']  = 'access';
         $item['active'] = false;
 
@@ -102,6 +109,7 @@ class PFmigratorModelMigrate extends JModelList
         // 8. Milestones migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES_DESC');
         $item['model']  = 'milestones';
         $item['active'] = false;
 
@@ -110,6 +118,7 @@ class PFmigratorModelMigrate extends JModelList
         // 9. Tasks migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS_DESC');
         $item['model']  = 'tasks';
         $item['active'] = false;
 
@@ -118,6 +127,7 @@ class PFmigratorModelMigrate extends JModelList
         // 10. Forum migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM_DESC');
         $item['model']  = 'forum';
         $item['active'] = false;
 
@@ -126,6 +136,7 @@ class PFmigratorModelMigrate extends JModelList
         // 11. Time sheet migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME_DESC');
         $item['model']  = 'time';
         $item['active'] = false;
 
@@ -134,6 +145,7 @@ class PFmigratorModelMigrate extends JModelList
         // 12. Prepare repo
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO_DESC');
         $item['model']  = 'preprepo';
         $item['active'] = false;
 
@@ -142,6 +154,7 @@ class PFmigratorModelMigrate extends JModelList
         // 13. Migrate folders
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPODIRS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPODIRS_DESC');
         $item['model']  = 'repodirs';
         $item['active'] = false;
 
@@ -150,6 +163,7 @@ class PFmigratorModelMigrate extends JModelList
         // 14. Migrate notes
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTES');
+        $item['desc']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTES_DESC');
         $item['model']  = 'reponotes';
         $item['active'] = false;
 
@@ -158,6 +172,7 @@ class PFmigratorModelMigrate extends JModelList
         // 15. Migrate files
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILES');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILES_DESC');
         $item['model']  = 'repofiles';
         $item['active'] = false;
 
@@ -166,6 +181,7 @@ class PFmigratorModelMigrate extends JModelList
         // 16. Prepare FM Pro migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO_DESC');
         $item['model']  = 'prepfmpro';
         $item['active'] = false;
 
@@ -174,6 +190,7 @@ class PFmigratorModelMigrate extends JModelList
         // 17. Migrate note revisions
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS_DESC');
         $item['model']  = 'reponoterevs';
         $item['active'] = false;
 
@@ -182,6 +199,7 @@ class PFmigratorModelMigrate extends JModelList
         // 18. Migrate file revisions
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS_DESC');
         $item['model']  = 'repofilerevs';
         $item['active'] = false;
 
@@ -190,6 +208,7 @@ class PFmigratorModelMigrate extends JModelList
         // 19. Prepare Designs migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS_DESC');
         $item['model']  = 'prepdesigns';
         $item['active'] = false;
 
@@ -198,6 +217,7 @@ class PFmigratorModelMigrate extends JModelList
         // 20. Install Designs dummy extension
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS_DESC');
         $item['model']  = 'installdesigns';
         $item['active'] = false;
 
@@ -206,6 +226,7 @@ class PFmigratorModelMigrate extends JModelList
         // 21. Migrate Designs
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS_DESC');
         $item['model']  = 'designs';
         $item['active'] = false;
 
@@ -214,6 +235,7 @@ class PFmigratorModelMigrate extends JModelList
         // 22. Comments
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_COMMENTS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_COMMENTS_DESC');
         $item['model']  = 'comments';
         $item['active'] = false;
 
@@ -222,6 +244,7 @@ class PFmigratorModelMigrate extends JModelList
         // 23. Attachments
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_ATTACHMENTS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_ATTACHMENTS_DESC');
         $item['model']  = 'attachments';
         $item['active'] = false;
 

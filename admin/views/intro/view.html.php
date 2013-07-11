@@ -21,6 +21,7 @@ JHtml::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_pfmigrator/helpers/
 class PFmigratorViewIntro extends JViewLegacy
 {
     public $checklist = array();
+    public $processes = array();
 
     /**
      * Display the view
@@ -28,8 +29,11 @@ class PFmigratorViewIntro extends JViewLegacy
      */
     public function display($tpl = null)
     {
+        $model = JModelLegacy::getInstance('Migrate', 'PFmigratorModel');
+
         // Populate check list
         $this->checklist = $this->getChecklist();
+        $this->processes = $model->getItems();
 
         // Check for errors
         $errors = $this->get('Errors');
@@ -89,12 +93,29 @@ class PFmigratorViewIntro extends JViewLegacy
 
         // Check Projectfork
         $query->clear()
-              ->select('extension_id')
+              ->select('manifest_cache')
               ->from('#__extensions')
               ->where('element = ' . $db->quote('com_projectfork'));
 
         $db->setQuery($query);
-        $success = (int) $db->loadResult();
+        $manifest = $db->loadResult();
+
+        if (empty($manifest)) {
+            $success = false;
+        }
+        else {
+            $reg = new JRegistry();
+            $reg->loadString($manifest);
+
+            $ver = $reg->get('version');
+
+            if (empty($ver)) {
+                $success = false;
+            }
+            else {
+                $success = (version_compare($ver, '3', 'ge') && version_compare($ver, '4', 'lt'));
+            }
+        }
 
         $item = array();
         $item['name']     = 'pf_installed';
@@ -103,6 +124,17 @@ class PFmigratorViewIntro extends JViewLegacy
         $item['optional'] = false;
         $item['uinput']   = false;
         $item['success']  = $success;
+
+        $list[] = $item;
+
+        // Check default template
+        $item = array();
+        $item['name']     = 'template';
+        $item['title']    = JText::_('COM_PFMIGRATOR_CHECK_TEMPLATE_TITLE');
+        $item['desc']     = JText::_('COM_PFMIGRATOR_CHECK_TEMPLATE_DESC');
+        $item['optional'] = true;
+        $item['uinput']   = false;
+        $item['success']  = $this->checkTemplate();
 
         $list[] = $item;
 
@@ -141,5 +173,22 @@ class PFmigratorViewIntro extends JViewLegacy
 
         // Return list
         return $list;
+    }
+
+
+    protected function checkTemplate()
+    {
+        $db    = JFactory::getDbo();
+        $query = $db->getQuery(true);
+
+        $query->select('template')
+              ->from('#__template_styles')
+              ->where('client_id = 1')
+              ->where('home = 1');
+
+        $db->setQuery($query, 0, 1);
+        $name = $db->loadResult();
+
+        return ($name == 'bluestork');
     }
 }

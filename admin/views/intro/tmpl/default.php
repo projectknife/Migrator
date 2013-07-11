@@ -47,8 +47,37 @@ Joomla.submitbutton = function(task)
     <div class="width-60 fltlft">
         <div class="width-100">
             <fieldset class="adminform">
-                <legend>Welcome</legend>
+                <legend><?php echo JText::_('COM_PFMIGRATOR_INTRO_WELCOME'); ?></legend>
                 <p><?php echo JText::_('COM_PFMIGRATOR_INTRO_TXT_1'); ?></p>
+                <h3><?php echo JText::_('COM_PFMIGRATOR_INTRO_BACKUP'); ?></h3>
+                <p>
+                    <?php
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_2') . ' ';
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_3') . ' ';
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_4');
+                    ?>
+                </p>
+                <h3><?php echo JText::_('COM_PFMIGRATOR_INTRO_MIGRATION_PROCESS'); ?></h3>
+                <p>
+                    <?php
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_7') . ' ';
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_8') . ' ';
+                    ?>
+                </p>
+                <h3><?php echo JText::_('COM_PFMIGRATOR_INTRO_AFTER_THE_MIGRATION'); ?></h3>
+                <p>
+                    <?php
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_9') . ' ';
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_10') . ' ';
+                    ?>
+                </p>
+                <h3><?php echo JText::_('COM_PFMIGRATOR_INTRO_TROUBLESHOOTING'); ?></h3>
+                <p>
+                    <?php
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_5') . ' ';
+                        echo JText::_('COM_PFMIGRATOR_INTRO_TXT_6') . ' ';
+                    ?>
+                </p>
             </fieldset>
         </div>
     </div>
@@ -98,6 +127,33 @@ Joomla.submitbutton = function(task)
                                                 echo  ' (' . JText::_('COM_PFMIGRATOR_OPTIONAL') . ')';
                                             }
                                         ?>
+                                    </label>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </fieldset>
+            <fieldset class="adminform">
+                <legend><?php echo JText::_('COM_PFMIGRATOR_FIELDSET_PROCESSES_PREVIEW'); ?></legend>
+                <p><?php echo JText::_('COM_PFMIGRATOR_FIELDSET_PROCESSES_PREVIEW_DESC'); ?></p>
+                <table class="adminlist">
+                    <tbody>
+                        <?php
+                        foreach ($this->processes AS $i => $item)
+                        {
+                            ?>
+                            <tr class="row<?php echo $i % 2; ?>">
+                                <td style="width: 20px;" class="nowrap">
+                                    <?php echo $i + 1;?>.
+                                </td>
+                                <td>
+                                    <label class="hasTip" style="cursor: help;"
+                                        title="<?php echo $item['title'] . '::' . $item['desc']; ?>"
+                                        >
+                                        <?php echo $item['title']; ?>
                                     </label>
                                 </td>
                             </tr>

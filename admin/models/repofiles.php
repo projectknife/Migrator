@@ -34,7 +34,7 @@ class PFmigratorModelRepoFiles extends JModelList
         $query = $this->_db->getQuery(true);
         $query->select('a.*, p.access')
               ->from('#__pf_files_tmp AS a')
-              ->join('INNER', '#__pf_projects AS p ON p.id = a.project')
+              ->join('LEFT', '#__pf_projects AS p ON p.id = a.project')
               ->order('a.id ASC');
 
         $limit = $this->getLimit();
@@ -96,6 +96,8 @@ class PFmigratorModelRepoFiles extends JModelList
 
     protected function migrate($row)
     {
+        if (!$row->access) return true;
+
         if (!$row->dir) {
             $row->dir = $this->getProjectRepo($row->project);
         }
