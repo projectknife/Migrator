@@ -2,7 +2,7 @@
 <extension type="component" version="2.5" method="upgrade">
     <name>com_pfmigrator</name>
     <author>Tobias Kuhn</author>
-    <creationDate>June 2013</creationDate>
+    <creationDate>July 2013</creationDate>
     <copyright>(C) 2013 Tobias Kuhn. All rights reserved.</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>support@projectfork.net</authorEmail>
