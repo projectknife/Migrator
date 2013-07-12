@@ -121,11 +121,25 @@ abstract class PFmigratorHelper
 
         if (!is_null($result)) return $result;
 
-        $db    = JFactory::getDbo();
-        $query = $db->getQuery(true);
+        $db     = JFactory::getDbo();
+        $prefix = JFactory::getConfig()->get('dbprefix');
+        $tables = $db->getTableList();
+        $query  = $db->getQuery(true);
+
+        if (in_array($prefix . 'pf_sections_tmp', $tables)) {
+            $table_name = '#__pf_sections_tmp';
+        }
+        elseif (in_array($prefix . 'pf_sections', $tables)) {
+            $table_name = '#__pf_sections';
+        }
+        else {
+            $result = false;
+
+            return $result;
+        }
 
         $query->select('id')
-              ->from('#__pf_sections_tmp')
+              ->from($table_name)
               ->where('name = ' . $db->quote('filemanager_pro'));
 
         $db->setQuery($query);
@@ -143,11 +157,25 @@ abstract class PFmigratorHelper
 
         if (!is_null($result)) return $result;
 
-        $db    = JFactory::getDbo();
-        $query = $db->getQuery(true);
+        $db     = JFactory::getDbo();
+        $prefix = JFactory::getConfig()->get('dbprefix');
+        $tables = $db->getTableList();
+        $query  = $db->getQuery(true);
+
+        if (in_array($prefix . 'pf_sections_tmp', $tables)) {
+            $table_name = '#__pf_sections_tmp';
+        }
+        elseif (in_array($prefix . 'pf_sections', $tables)) {
+            $table_name = '#__pf_sections';
+        }
+        else {
+            $result = false;
+
+            return $result;
+        }
 
         $query->select('id')
-              ->from('#__pf_sections_tmp')
+              ->from($table_name)
               ->where('name = ' . $db->quote('design_review'));
 
         $db->setQuery($query);
