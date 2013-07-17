@@ -30,9 +30,6 @@ var PFmigrator =
             cache: false,
             onSuccess: function(resp)
             {
-                console.log('success');
-                console.log(resp);
-
                 // Update hidden form fields
                 $('jform_limitstart').set('value', resp.limitstart);
                 $('jform_total').set('value', resp.total);
@@ -117,6 +114,21 @@ var PFmigrator =
 
                 $('jform_exception_rsp').set('html', text);
                 $('jform_exception_rsp_err').set('text', error);
+                $('jform_exception').show();
+            },
+            onFailure: function(xhr)
+            {
+                $('jform_progress').hide();
+                $('jform_counter').hide();
+
+                var txt  = xhr.responseText;
+                var stat = xhr.statusText;
+
+                if (txt != "" && stat != "") {
+                    $('jform_exception_rsp').set('html', txt);
+                    $('jform_exception_rsp_err').set('text', stat);
+                }
+
                 $('jform_exception').show();
             },
             onComplete: function()

@@ -69,7 +69,7 @@ class PFmigratorModelInstallPF extends JModelList
             if (JFile::exists($dest)) JFile::delete($dest);
 
             $this->success = false;
-            $this->log[] = JText::_('COM_PFMIGRATOR_PKG_INSTALL_FAILED');
+            $this->log[] = JText::_('COM_PFMIGRATOR_PKG_INSTALL_FAILED') . ' ' . $installer->message . ' ' . $installer->get('extension_message');
 
             return false;
         }
