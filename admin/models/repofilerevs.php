@@ -166,7 +166,7 @@ class PFmigratorModelRepoFileRevs extends JModelList
 
         $title = $name;
 
-        if (strlen($title) < 56) {
+        if (strlen($title) > 52) {
             // Truncate title to 52 chars to leave some room for dupe numeration (1, 2, 3) etc.
             $title = substr($title, 0, 52);
         }
