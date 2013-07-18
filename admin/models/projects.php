@@ -24,11 +24,13 @@ class PFmigratorModelProjects extends JModelList
     protected $log     = array();
     protected $success = true;
     protected $access  = 1;
+    protected $cdata   = null;
 
     public function process($limitstart = 0)
     {
         $config = JFactory::getConfig();
 
+        $this->cdata  = PFmigratorHelper::getCustomData();
         $this->access = $config->get('access', 1);
 
         $query = $this->_db->getQuery(true);
@@ -137,6 +139,15 @@ class PFmigratorModelProjects extends JModelList
         $obj->attribs['email']   = $row->email;
 
         $obj->attribs = json_encode($obj->attribs);
+
+        // Set category
+        if ($row->category) {
+            $cid = $this->cdata->get('cat-' . $row->category);
+
+            if ($cid) {
+                $obj->catid = $cid;
+            }
+        }
 
         // Store base item
         if (!$this->_db->insertObject('#__pf_projects', $obj)) {

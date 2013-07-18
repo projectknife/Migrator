@@ -79,7 +79,16 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 5. Migrate projects
+        // 5. Migrate Project Categories
+        $item = array();
+        $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_CATS');
+        $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_CATS_DESC');
+        $item['model']  = 'projectcats';
+        $item['active'] = false;
+
+        $items[] = $item;
+
+        // 6. Migrate projects
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_PROJECTS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_PROJECTS_DESC');
@@ -88,7 +97,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 6. Prepare Access migration
+        // 7. Prepare Access migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_ACCESS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_ACCESS_DESC');
@@ -97,7 +106,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 7. Access migration
+        // 8. Access migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_ACCESS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_ACCESS_DESC');
@@ -106,7 +115,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 8. Milestones migration
+        // 9. Milestones migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_MILESTONES_DESC');
@@ -115,7 +124,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 9. Tasks migration
+        // 10. Tasks migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TASKS_DESC');
@@ -124,7 +133,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 10. Forum migration
+        // 11. Forum migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_FORUM_DESC');
@@ -133,7 +142,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 11. Time sheet migration
+        // 12. Time sheet migration
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_TIME_DESC');
@@ -142,7 +151,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 12. Prepare repo
+        // 13. Prepare repo
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_REPO_DESC');
@@ -151,7 +160,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 13. Migrate folders
+        // 14. Migrate folders
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPODIRS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPODIRS_DESC');
@@ -160,7 +169,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 14. Migrate notes
+        // 15. Migrate notes
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTES');
         $item['desc']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTES_DESC');
@@ -169,7 +178,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 15. Migrate files
+        // 16. Migrate files
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILES');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILES_DESC');
@@ -179,7 +188,7 @@ class PFmigratorModelMigrate extends JModelList
         $items[] = $item;
 
         if (PFMigratorHelper::designsInstalled()) {
-            // 16. Prepare FM Pro migration
+            // 17. Prepare FM Pro migration
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_FMPRO_DESC');
@@ -188,7 +197,7 @@ class PFmigratorModelMigrate extends JModelList
 
             $items[] = $item;
 
-            // 17. Migrate note revisions
+            // 18. Migrate note revisions
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPONOTEREVS_DESC');
@@ -197,7 +206,7 @@ class PFmigratorModelMigrate extends JModelList
 
             $items[] = $item;
 
-            // 18. Migrate file revisions
+            // 19. Migrate file revisions
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_REPOFILEREVS_DESC');
@@ -209,7 +218,7 @@ class PFmigratorModelMigrate extends JModelList
 
 
         if (PFMigratorHelper::designsInstalled()) {
-            // 19. Prepare Designs migration
+            // 20. Prepare Designs migration
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_PREP_DESIGNS_DESC');
@@ -218,7 +227,7 @@ class PFmigratorModelMigrate extends JModelList
 
             $items[] = $item;
 
-            // 20. Install Designs dummy extension
+            // 21. Install Designs dummy extension
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_INSTALL_DESIGNS_DESC');
@@ -227,7 +236,7 @@ class PFmigratorModelMigrate extends JModelList
 
             $items[] = $item;
 
-            // 21. Migrate Designs
+            // 22. Migrate Designs
             $item = array();
             $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS');
             $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_DESIGNS_DESC');
@@ -237,7 +246,7 @@ class PFmigratorModelMigrate extends JModelList
             $items[] = $item;
         }
 
-        // 22. Comments
+        // 23. Comments
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_COMMENTS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_COMMENTS_DESC');
@@ -246,7 +255,7 @@ class PFmigratorModelMigrate extends JModelList
 
         $items[] = $item;
 
-        // 23. Attachments
+        // 24. Attachments
         $item = array();
         $item['title']  = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_ATTACHMENTS');
         $item['desc']   = JText::_('COM_PFMIGRATOR_PROC_MIGRATE_ATTACHMENTS_DESC');
