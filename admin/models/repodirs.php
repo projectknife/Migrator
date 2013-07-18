@@ -54,6 +54,11 @@ class PFmigratorModelRepoDirs extends JModelList
 
         $titles = array();
 
+        // Increase Auto Inc value
+        if ($limitstart == 0) {
+            $this->setAutoInc();
+        }
+
         foreach ($rows AS $row)
         {
             if (!$this->migrate($row)) return false;
@@ -411,5 +416,47 @@ class PFmigratorModelRepoDirs extends JModelList
         $result = (int) $this->_db->loadResult();
 
         return ($result > 0 ? true : false);
+    }
+
+
+    protected function setAutoInc()
+    {
+        $query = $this->_db->getQuery(true);
+
+        $query->select('id')
+              ->from('#__pf_folders_tmp')
+              ->order('id DESC');
+
+        $this->_db->setQuery($query, 0, 1);
+        $max_id = $this->_db->loadResult();
+
+        $query->clear();
+        $query->select('id')
+              ->from('#__pf_repo_dirs')
+              ->order('id DESC');
+
+        $this->_db->setQuery($query, 0, 1);
+        $max_id2 = $this->_db->loadResult();
+
+        if ($max_id > $max_id2) {
+            $obj = new stdClass();
+            $obj->id    = $max_id;
+            $obj->title = 'migration_tmp_' . $max_id;
+
+            if (!$this->_db->insertObject('#__pf_repo_dirs', $obj)) {
+                $this->success = false;
+                $this->log[]   = $this->_db->getError();
+                return false;
+            }
+
+            $query->clear();
+            $query->delete('#__pf_repo_dirs')
+                  ->where('id = ' . $obj->id);
+
+            $this->_db->setQuery($query);
+            $this->_db->execute();
+        }
+
+        return true;
     }
 }
