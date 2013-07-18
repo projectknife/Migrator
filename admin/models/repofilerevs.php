@@ -165,7 +165,13 @@ class PFmigratorModelRepoFileRevs extends JModelList
         $obj = new stdClass();
 
         $title = $name;
-        $alias = JApplication::stringURLSafe($name);
+
+        if (strlen($title) < 56) {
+            // Truncate title to 52 chars to leave some room for dupe numeration (1, 2, 3) etc.
+            $title = substr($title, 0, 52);
+        }
+
+        $alias = JApplication::stringURLSafe($title);
         list($title, $alias) = $this->generateNewTitle($title, $alias, $row->file_id);
 
         $obj->id          = $row->id;
